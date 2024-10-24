@@ -16,7 +16,7 @@ type User struct {
 
 func (u *User) IsValid() (bool, error) {
 	if u.Email == "" || u.Prenom == "" || u.Nom == "" || u.password == "" {
-		return false, fmt.Errorf("L'email, le nom, le prénom et le mot de passe doivent être rempli")
+		return false, fmt.Errorf("Email, Name, Firstame and Password must be filled")
 	}
 
 	rep, err := u.isEmailValid()
@@ -58,7 +58,7 @@ func (u *User) isPasswordValid() (bool, error) {
 
 	passLen := len(u.password)
 	if 3 < passLen || passLen > 40 {
-		return false, fmt.Errorf("Le mot de passe doit être compris entre 3 et 40 Caractères")
+		return false, fmt.Errorf("PAssword needs to be between 3 and 40 characters")
 	}
 
 	var containsUpperCase = regexp.MustCompile(`[A-Z]`)
@@ -66,7 +66,7 @@ func (u *User) isPasswordValid() (bool, error) {
 	var containsNumber = regexp.MustCompile(`\d`)
 
 	if !containsUpperCase.MatchString(u.password) && !containsLowerCase.MatchString(u.password) && !containsNumber.MatchString(u.password) {
-		return false, fmt.Errorf("Le mot de passe doit avoir au minimum une majuscule, 1 minuscule et 1 chiffre")
+		return false, fmt.Errorf("PAssword needs to have at least 1 lower case, 1 uppercase and 1 number")
 	}
 
 	return true, nil
