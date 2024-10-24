@@ -14,6 +14,22 @@ type User struct {
 	BirthDate time.Time
 }
 
+func NewUser(email string, firstname string, name string, password string, birthdate time.Time) (User, error) {
+	user := User{
+		Email:     email,
+		Nom:       name,
+		Prenom:    firstname,
+		password:  password,
+		BirthDate: birthdate,
+	}
+
+	rep, err := user.IsValid()
+	if !rep || err != nil {
+		return User{}, err
+	}
+	return user, nil
+}
+
 func (u *User) IsValid() (bool, error) {
 	if u.Email == "" || u.Prenom == "" || u.Nom == "" || u.password == "" {
 		return false, fmt.Errorf("Email, Name, Firstame and Password must be filled")
@@ -57,16 +73,16 @@ func (u *User) isBirthdateValid() (bool, error) {
 func (u *User) isPasswordValid() (bool, error) {
 
 	passLen := len(u.password)
-	if 3 < passLen || passLen > 40 {
-		return false, fmt.Errorf("PAssword needs to be between 3 and 40 characters")
+	if passLen < 8 || passLen > 40 {
+		return false, fmt.Errorf("Password needs to be between 3 and 40 characters")
 	}
 
 	var containsUpperCase = regexp.MustCompile(`[A-Z]`)
 	var containsLowerCase = regexp.MustCompile(`[a-z]`)
 	var containsNumber = regexp.MustCompile(`\d`)
 
-	if !containsUpperCase.MatchString(u.password) && !containsLowerCase.MatchString(u.password) && !containsNumber.MatchString(u.password) {
-		return false, fmt.Errorf("PAssword needs to have at least 1 lower case, 1 uppercase and 1 number")
+	if !containsUpperCase.MatchString(u.password) || !containsLowerCase.MatchString(u.password) || !containsNumber.MatchString(u.password) {
+		return false, fmt.Errorf("Password needs to have at least 1 lower case, 1 uppercase and 1 number")
 	}
 
 	return true, nil
