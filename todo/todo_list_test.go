@@ -84,7 +84,7 @@ func TestAddTooManyItems(t *testing.T) {
 	err := list.AddItem("11th item", "Lorem ipsum")
 
 	assert.NotNil(t, err)
-	assert.Equal(t, "todoList cannot contain more than 10 items", err.Error())
+	assert.Equal(t, "TodoList cannot contain more than 10 items", err.Error())
 }
 
 func TestSave(t *testing.T) {

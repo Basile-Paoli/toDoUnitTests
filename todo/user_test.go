@@ -2,9 +2,19 @@ package todo
 
 import (
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"testing"
 	"time"
 )
+
+type mockEmailSender struct {
+	mock.Mock
+}
+
+func (e *mockEmailSender) SendEmail(recipientName string, subject string, body string) error {
+	args := e.Called(recipientName, subject, body)
+	return args.Error(0)
+}
 
 func TestUser(t *testing.T) {
 	_, err := NewUser("welp.welp@gmail.com", "prenom", "nom", "passworD12", time.Now().AddDate(-20, 0, 0))
@@ -62,8 +72,37 @@ func TestPassword(t *testing.T) {
 	// Wrong Password no password
 	_, err = NewUser("welp.welp@gmail.com", "welp", "welp", "", time.Now().AddDate(-20, 0, 0))
 	assert.NotNil(t, err, err)
+}
 
-	// Wrong Password no password (this case might not be possible with NewUser function)
-	_, err = NewUser("welp.welp@gmail.com", "welp", "welp", "", time.Now().AddDate(-20, 0, 0))
-	assert.NotNil(t, err, err)
+type mockTodoList struct {
+	mock.Mock
+}
+
+func (m *mockTodoList) AddItem(name string, content string) error {
+	args := m.Called(name, content)
+	return args.Error(0)
+}
+
+func (m *mockTodoList) GetItems() []TodoItem {
+	args := m.Called()
+	return args.Get(0).([]TodoItem)
+}
+
+func TestEmailSent(t *testing.T) {
+	mockEmail := &mockEmailSender{}
+	mockEmail.On("SendEmail", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+	mockTodo := &mockTodoList{}
+	mockTodo.On("AddItem", mock.Anything, mock.Anything).Return(nil)
+	var todoItems []TodoItem
+	for i := 0; i < 8; i++ {
+		todoItems = append(todoItems, TodoItem{})
+	}
+	mockTodo.On("GetItems").Return(todoItems)
+
+	user, _ := NewUser("welp.welp@gmail.com", "John", "Doe", "passworD12", time.Now().AddDate(-20, 0, 0))
+	user.emailer = mockEmail
+	user.TodoList = mockTodo
+
+	user.addTodo("foo", "test")
+	mockEmail.AssertCalled(t, "SendEmail", "Doe", "todolist almost full", "You have 2 items left to add")
 }

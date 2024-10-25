@@ -62,7 +62,7 @@ func (t *ToDoList) assertCanAddItem(name string, now time.Time) error {
 	}
 
 	if len(t.Items) >= 10 {
-		return errors.New("todoList cannot contain more than 10 items")
+		return errors.New("TodoList cannot contain more than 10 items")
 	}
 
 	return nil
@@ -75,6 +75,10 @@ func (t *ToDoList) containsName(name string) bool {
 		}
 	}
 	return false
+}
+
+func (t *ToDoList) GetItems() []TodoItem {
+	return t.Items
 }
 
 func newTodoList() *ToDoList {

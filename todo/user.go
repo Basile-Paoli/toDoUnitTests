@@ -17,13 +17,18 @@ func (e emailClientImpl) SendEmail(recipientName string, subject string, body st
 	return nil
 }
 
+type List interface {
+	AddItem(name string, content string) error
+	GetItems() []TodoItem
+}
+
 type User struct {
 	Email     string
 	Nom       string
 	Prenom    string
 	password  string
 	BirthDate time.Time
-	todoList  *ToDoList
+	TodoList  List
 	emailer   emailClient
 }
 
@@ -34,7 +39,7 @@ func NewUser(email string, firstname string, name string, password string, birth
 		Prenom:    firstname,
 		password:  password,
 		BirthDate: birthdate,
-		todoList:  newTodoList(),
+		TodoList:  newTodoList(),
 		emailer:   emailClientImpl{},
 	}
 
@@ -107,12 +112,12 @@ func (u *User) addTodo(name string, content string) error {
 	if err := u.ValidateUser(); err != nil {
 		return err
 	}
-	if err := u.todoList.AddItem(name, content); err != nil {
+	if err := u.TodoList.AddItem(name, content); err != nil {
 		return err
 	}
 
-	if len(u.todoList.Items) == 8 {
-		u.emailer.SendEmail(u.Nom, "TodoList almost full", "You have 2 items left to add")
+	if len(u.TodoList.GetItems()) == 8 {
+		u.emailer.SendEmail(u.Nom, "todolist almost full", "You have 2 items left to add")
 	}
 
 	return nil
