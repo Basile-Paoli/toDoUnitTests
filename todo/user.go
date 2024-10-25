@@ -117,7 +117,7 @@ func (u *User) addTodo(name string, content string) error {
 	}
 
 	if len(u.TodoList.GetItems()) == 8 {
-		u.emailer.SendEmail(u.Nom, "todolist almost full", "You have 2 items left to add")
+		u.emailer.SendEmail(u.LastName, "todolist almost full", "You have 2 items left to add")
 	}
 
 	return nil

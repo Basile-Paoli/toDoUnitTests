@@ -91,13 +91,11 @@ func (m *mockTodoList) GetItems() []TodoItem {
 func TestEmailSent(t *testing.T) {
 	mockEmail := &mockEmailSender{}
 	mockEmail.On("SendEmail", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
 	mockTodo := &mockTodoList{}
 	mockTodo.On("AddItem", mock.Anything, mock.Anything).Return(nil)
-	var todoItems []TodoItem
-	for i := 0; i < 8; i++ {
-		todoItems = append(todoItems, TodoItem{})
-	}
-	mockTodo.On("GetItems").Return(todoItems)
+	var items [8]TodoItem
+	mockTodo.On("GetItems").Return(items[:])
 
 	user, _ := NewUser("welp.welp@gmail.com", "John", "Doe", "passworD12", time.Now().AddDate(-20, 0, 0))
 	user.emailer = mockEmail
