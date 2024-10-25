@@ -6,12 +6,25 @@ import (
 	"time"
 )
 
+type emailClient interface {
+	SendEmail(recipientName string, subject string, body string) error
+}
+
+type emailClientImpl struct {
+}
+
+func (e emailClientImpl) SendEmail(recipientName string, subject string, body string) error {
+	return nil
+}
+
 type User struct {
 	Email     string
 	Nom       string
 	Prenom    string
 	password  string
 	BirthDate time.Time
+	todoList  *ToDoList
+	emailer   emailClient
 }
 
 func NewUser(email string, firstname string, name string, password string, birthdate time.Time) (User, error) {
@@ -21,6 +34,8 @@ func NewUser(email string, firstname string, name string, password string, birth
 		Prenom:    firstname,
 		password:  password,
 		BirthDate: birthdate,
+		todoList:  newTodoList(),
+		emailer:   emailClientImpl{},
 	}
 
 	err := user.ValidateUser()
@@ -83,6 +98,21 @@ func (u *User) validatePassword() error {
 
 	if !containsUpperCase.MatchString(u.password) || !containsLowerCase.MatchString(u.password) || !containsNumber.MatchString(u.password) {
 		return fmt.Errorf("Password needs to have at least 1 lower case, 1 uppercase and 1 number")
+	}
+
+	return nil
+}
+
+func (u *User) addTodo(name string, content string) error {
+	if err := u.ValidateUser(); err != nil {
+		return err
+	}
+	if err := u.todoList.AddItem(name, content); err != nil {
+		return err
+	}
+
+	if len(u.todoList.Items) == 8 {
+		u.emailer.SendEmail(u.Nom, "TodoList almost full", "You have 2 items left to add")
 	}
 
 	return nil
