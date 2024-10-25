@@ -17,25 +17,23 @@ func (p *mockTimeProvider) Now() time.Time {
 	return args.Get(0).(time.Time)
 }
 
-func TestAddItemName(t *testing.T) {
+func TestContainsName(t *testing.T) {
 	list := newTodoList()
 	err := list.AddItem("foo", "test")
 	assert.Nil(t, err)
 
 	assert.True(t, list.containsName("foo"))
+	assert.False(t, list.containsName("bar"))
 }
 
 func TestAddItemsAtTheSameTime(t *testing.T) {
-	mockTime := &mockTimeProvider{}
-	list := &ToDoList{timeProvider: mockTime}
+	list := newTodoList()
 
-	mockTime.On("Now").Return(time.Now())
 	list.AddItem("foo", "Lorem")
-	mockTime.AssertNumberOfCalls(t, "Now", 1)
 
 	err := list.AddItem("bar", "test")
 	assert.NotNil(t, err)
-	mockTime.AssertNumberOfCalls(t, "Now", 2)
+	assert.Equal(t, "cannot add new item yet", err.Error())
 }
 
 func TestAddItemsSeparately(t *testing.T) {
@@ -51,7 +49,7 @@ func TestAddItemsSeparately(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestAddToManyItems(t *testing.T) {
+func TestAddTooManyItems(t *testing.T) {
 
 	mockTime := &mockTimeProvider{}
 	list := &ToDoList{timeProvider: mockTime}
@@ -62,6 +60,9 @@ func TestAddToManyItems(t *testing.T) {
 		assert.Nil(t, err)
 	}
 
-	mockTime.On("Now").Once().Return(time.Now().Add(time.Hour * time.Duration(10)))
-	assert.NotNil(t, list.AddItem("11th item", "Lorem ipsum"))
+	mockTime.On("Now").Once().Return(time.Now().Add(time.Hour * 10))
+	err := list.AddItem("11th item", "Lorem ipsum")
+
+	assert.NotNil(t, err)
+	assert.Equal(t, "todoList cannot contain more than 10 items", err.Error())
 }
