@@ -16,10 +16,22 @@ func (p realTimeProvider) Now() time.Time {
 	return time.Now()
 }
 
+type repository interface {
+	Save(item TodoItem) error
+}
+
+type repositoryImpl struct {
+}
+
+func (repositoryImpl) Save(item TodoItem) error {
+	return errors.New("not implemented")
+}
+
 type ToDoList struct {
 	Items        []TodoItem
 	LastAddedAt  time.Time
 	timeProvider timeProvider
+	repository   repository
 }
 
 func (t *ToDoList) AddItem(name string, content string) error {
@@ -37,7 +49,7 @@ func (t *ToDoList) AddItem(name string, content string) error {
 	t.Items = append(t.Items, item)
 	t.LastAddedAt = now
 
-	return nil
+	return t.repository.Save(item)
 }
 
 func (t *ToDoList) assertCanAddItem(name string, now time.Time) error {
@@ -66,5 +78,8 @@ func (t *ToDoList) containsName(name string) bool {
 }
 
 func newTodoList() *ToDoList {
-	return &ToDoList{timeProvider: realTimeProvider{}}
+	return &ToDoList{
+		timeProvider: realTimeProvider{},
+		repository:   repositoryImpl{},
+	}
 }

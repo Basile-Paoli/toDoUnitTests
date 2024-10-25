@@ -17,8 +17,26 @@ func (p *mockTimeProvider) Now() time.Time {
 	return args.Get(0).(time.Time)
 }
 
+type mockRepository struct {
+	mock.Mock
+}
+
+func (r *mockRepository) Save(item TodoItem) error {
+	args := r.Called(item)
+	return args.Error(0)
+}
+
+func newTestTodoList() *ToDoList {
+	mockRepo := &mockRepository{}
+	mockRepo.On("Save", mock.Anything).Return(nil)
+	res := newTodoList()
+	res.repository = mockRepo
+
+	return res
+}
+
 func TestContainsName(t *testing.T) {
-	list := newTodoList()
+	list := newTestTodoList()
 	err := list.AddItem("foo", "test")
 	assert.Nil(t, err)
 
@@ -27,7 +45,7 @@ func TestContainsName(t *testing.T) {
 }
 
 func TestAddItemsAtTheSameTime(t *testing.T) {
-	list := newTodoList()
+	list := newTestTodoList()
 
 	list.AddItem("foo", "Lorem")
 
@@ -38,7 +56,8 @@ func TestAddItemsAtTheSameTime(t *testing.T) {
 
 func TestAddItemsSeparately(t *testing.T) {
 	mockTime := &mockTimeProvider{}
-	list := &ToDoList{timeProvider: mockTime}
+	list := newTestTodoList()
+	list.timeProvider = mockTime
 
 	mockTime.On("Now").Once().Return(time.Now())
 	list.AddItem("foo", "Lorem")
@@ -52,7 +71,8 @@ func TestAddItemsSeparately(t *testing.T) {
 func TestAddTooManyItems(t *testing.T) {
 
 	mockTime := &mockTimeProvider{}
-	list := &ToDoList{timeProvider: mockTime}
+	list := newTestTodoList()
+	list.timeProvider = mockTime
 
 	for i := 0; i < 10; i++ {
 		mockTime.On("Now").Once().Return(time.Now().Add(time.Hour * time.Duration(i)))
@@ -65,4 +85,14 @@ func TestAddTooManyItems(t *testing.T) {
 
 	assert.NotNil(t, err)
 	assert.Equal(t, "todoList cannot contain more than 10 items", err.Error())
+}
+
+func TestSave(t *testing.T) {
+	list := newTestTodoList()
+	mockRepo := &mockRepository{}
+	list.repository = mockRepo
+
+	mockRepo.On("Save", mock.Anything).Return(nil)
+	list.AddItem("foo", "Lorem ipsum")
+	mockRepo.AssertCalled(t, "Save", mock.Anything)
 }
