@@ -102,5 +102,5 @@ func TestEmailSent(t *testing.T) {
 	user.TodoList = mockTodo
 
 	user.addTodo("foo", "test")
-	mockEmail.AssertCalled(t, "Sendmail", "Doe", "todolist almost full", "You have 2 items left to add")
+	mockEmail.AssertCalled(t, "SendEmail", "Doe", "todolist almost full", "You have 2 items left to add")
 }
