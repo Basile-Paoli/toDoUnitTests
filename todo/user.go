@@ -24,8 +24,8 @@ type List interface {
 
 type User struct {
 	Email     string
-	Nom       string
-	Prenom    string
+	LastName  string
+	FirstName string
 	password  string
 	BirthDate time.Time
 	TodoList  List
@@ -35,8 +35,8 @@ type User struct {
 func NewUser(email string, firstname string, name string, password string, birthdate time.Time) (User, error) {
 	user := User{
 		Email:     email,
-		Nom:       name,
-		Prenom:    firstname,
+		LastName:  name,
+		FirstName: firstname,
 		password:  password,
 		BirthDate: birthdate,
 		TodoList:  newTodoList(),
@@ -51,7 +51,7 @@ func NewUser(email string, firstname string, name string, password string, birth
 }
 
 func (u *User) ValidateUser() error {
-	if u.Email == "" || u.Prenom == "" || u.Nom == "" || u.password == "" {
+	if u.Email == "" || u.FirstName == "" || u.LastName == "" || u.password == "" {
 		return fmt.Errorf("Email, Name, Firstame and Password must be filled")
 	}
 
